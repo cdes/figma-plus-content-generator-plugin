@@ -1,0 +1,24 @@
+{
+  "name": "figma-content-generator-plugin",
+  "productName": "Content Generator",
+  "version": "1.0.0",
+  "description": "Generate placeholder content, names, photos, articles and more on the fly.",
+  "main": "index.js",
+  "repository": "https://github.com/cdes/figma-content-generator-plugin",
+  "author": "Ahmed Al Haddad <ahmed.hdd@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel watch ./src/index.js --out-dir ./dist --out-file content-generator.js",
+    "build": "parcel build ./src/index.js --out-dir ./dist --out-file content-generator.js"
+  },
+  "dependencies": {
+    "json5": "^2.1.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "parcel-bundler": "^1.9.7"
+  }
+}
