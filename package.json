@@ -3,22 +3,39 @@
   "productName": "Content Generator",
   "version": "1.0.0",
   "description": "Generate placeholder content, names, photos, articles and more on the fly.",
-  "main": "index.js",
   "repository": "https://github.com/cdes/figma-content-generator-plugin",
-  "author": "Ahmed Al Haddad <ahmed.hdd@gmail.com>",
+  "author": "Ahmed Al Haddad <haddad@ah.sa>",
   "license": "MIT",
   "scripts": {
-    "start": "parcel watch ./src/index.js --out-dir ./dist --out-file content-generator.js",
-    "build": "parcel build ./src/index.js --out-dir ./dist --out-file content-generator.js"
-  },
-  "dependencies": {
-    "json5": "^2.1.0"
+    "build": "webpack --config webpack/webpack.config.prod.js  --colors",
+    "start": "webpack-dev-server --config webpack/webpack.config.dev.js"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "parcel-bundler": "^1.9.7"
+    "@babel/core": "^7.1.6",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@babel/preset-env": "^7.1.6",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.4",
+    "clean-webpack-plugin": "^1.0.0",
+    "copy-webpack-plugin": "^4.6.0",
+    "css-loader": "^1.0.1",
+    "eslint": "^5.9.0",
+    "eslint-loader": "^2.1.1",
+    "eslint-plugin-babel": "^5.3.0",
+    "file-loader": "^2.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.4.5",
+    "node-sass": "^4.10.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.23.1",
+    "webpack": "^4.26.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10",
+    "webpack-merge": "^4.1.4"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.0.0",
+    "json5": "^2.1.0"
   }
 }
