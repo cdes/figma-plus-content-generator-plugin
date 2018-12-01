@@ -110,7 +110,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getRandom = void 0;
+exports.toast = exports.getRandom = void 0;
 
 var getRandom = function getRandom(arr, n) {
   var result = new Array(n),
@@ -128,6 +128,17 @@ var getRandom = function getRandom(arr, n) {
 };
 
 exports.getRandom = getRandom;
+
+var toast = function toast(message) {
+  App._store.dispatch({
+    type: "VISUAL_BELL_ENQUEUE",
+    payload: {
+      message: message || ""
+    }
+  });
+};
+
+exports.toast = toast;
 },{}],"api.js":[function(require,module,exports) {
 "use strict";
 
@@ -137,13 +148,13 @@ Object.defineProperty(exports, "__esModule", {
 exports.getPersonsFemale = exports.getPersonsMale = exports.getPersons = exports.getWomenFaces = exports.getMenFaces = void 0;
 
 var getMenFaces = function getMenFaces() {
-  return loadXHR("https://gist.githubusercontent.com/cdes/3b320fe1c5048d6dc41eb002536595d2/raw/75613828bc85ab67fa0710a1636bbe906f467e82/men-faces.json");
+  return loadXHR("https://cdes.github.io/cdes/figma-content-generator-plugin/dist/men-faces.json");
 };
 
 exports.getMenFaces = getMenFaces;
 
 var getWomenFaces = function getWomenFaces() {
-  return loadXHR("https://cdes.github.io/figma-content-generator-plugin/dist/women-faces.json");
+  return loadXHR("https://cdes.github.io/cdes/figma-content-generator-plugin/dist/women-faces.json");
 };
 
 exports.getWomenFaces = getWomenFaces;
@@ -198,8 +209,6 @@ var _utilities = require("./utilities");
 
 var _api = require("./api");
 
-var _window$figmaPlugin, _window$figmaPlugin$c, _window$figmaPlugin$c2;
-
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -223,7 +232,20 @@ var ContentGenerator = function ContentGenerator() {
           resolve((0, _utilities.getRandom)(menFaces, count));
         });
       } else {
-        resolve((0, _utilities.getRandom)(_this.state.menFaces, count));
+        resolve((0, _utilities.getRandom)(_this.state.menFaces, count % 99));
+      }
+    });
+  };
+
+  this.getRandomWomenFaces = function (count) {
+    return new Promise(function (resolve, reject) {
+      if (_this.state.womenFaces.length === 0) {
+        (0, _api.getWomenFaces)().then(function (womenFaces) {
+          _this.state.womenFaces = womenFaces;
+          resolve((0, _utilities.getRandom)(womenFaces, count));
+        });
+      } else {
+        resolve((0, _utilities.getRandom)(_this.state.womenFaces, count % 99));
       }
     });
   };
@@ -237,26 +259,37 @@ var ContentGenerator = function ContentGenerator() {
     }
 
     _this.getRandomMenFaces(selectedNodes.length).then(function (faces) {
-      console.log("resolved", faces);
-      selectedNodes.map(function (node, index) {
-        setTimeout(function () {
-          App.sendMessage('clearSelection');
-          App.sendMessage('addToSelection', {
-            nodeIds: [node]
-          });
-          var fillPaints = App._state.mirror.selectionProperties.fillPaints;
-
-          _this.addFillToSelectedLayer(fillPaints, faces[index % 99]);
-        }, 1000 + index * 250);
-      });
+      _this.addFillToSelectedLayer(selectedNodes, faces);
     });
   };
 
-  this.addFillToSelectedLayer = function (currentFill, newFill) {
-    App.updateSelectionProperties({
-      fillPaints: _toConsumableArray(currentFill).concat([newFill])
+  this.fillWomenFaces = function () {
+    var selectedNodes = Object.keys(App._state.mirror.sceneGraphSelection);
+
+    if (selectedNodes.length === 0) {
+      (0, _utilities.toast)('You must select at least one layer.');
+      return;
+    }
+
+    _this.getRandomWomenFaces(selectedNodes.length).then(function (faces) {
+      _this.addFillToSelectedLayer(selectedNodes, faces);
     });
-    App.sendMessage('clearSelection');
+  };
+
+  this.addFillToSelectedLayer = function (selectedNodes, fills) {
+    selectedNodes.map(function (node, index) {
+      App.sendMessage('clearSelection');
+      App.sendMessage('addToSelection', {
+        nodeIds: [node]
+      });
+      var currentFill = App._state.mirror.selectionProperties.fillPaints;
+      var cappedIndex = index % fills.length;
+      var newFill = fills[cappedIndex];
+      App.updateSelectionProperties({
+        fillPaints: _toConsumableArray(currentFill).concat([newFill])
+      });
+      App.sendMessage('clearSelection');
+    });
   };
 
   this.name = 'Content Generator';
@@ -267,13 +300,25 @@ var ContentGenerator = function ContentGenerator() {
 };
 
 var contentGeneratorPlugin = new ContentGenerator();
-var options = [contentGeneratorPlugin.name, contentGeneratorPlugin.fillMenFaces.bind(contentGeneratorPlugin)];
-
-(_window$figmaPlugin = window.figmaPlugin).createPluginsMenuItem.apply(_window$figmaPlugin, options);
-
-(_window$figmaPlugin$c = window.figmaPlugin.createContextMenuItem).Canvas.apply(_window$figmaPlugin$c, options);
-
-(_window$figmaPlugin$c2 = window.figmaPlugin.createContextMenuItem).ObjectsPanel.apply(_window$figmaPlugin$c2, options);
+var options = ["Fill Faces", function () {}, null, [{
+  itemLabel: "Men",
+  triggerFunction: contentGeneratorPlugin.fillMenFaces.bind(contentGeneratorPlugin)
+}, {
+  itemLabel: "Women",
+  triggerFunction: contentGeneratorPlugin.fillWomenFaces.bind(contentGeneratorPlugin)
+}]];
+var menuItems = [{
+  title: "Generate: Men Faces",
+  trigger: contentGeneratorPlugin.fillMenFaces.bind(contentGeneratorPlugin)
+}, {
+  title: "Generate: Women Faces",
+  trigger: contentGeneratorPlugin.fillWomenFaces.bind(contentGeneratorPlugin)
+}];
+menuItems.map(function (item) {
+  window.figmaPlugin.createPluginsMenuItem(item.title, item.trigger);
+  window.figmaPlugin.createContextMenuItem.Selection(item.title, item.trigger);
+  window.figmaPlugin.createContextMenuItem.ObjectsPanel(item.title, item.trigger);
+});
 },{"./utilities":"utilities.js","./api":"api.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
@@ -315,7 +360,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64695" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63851" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

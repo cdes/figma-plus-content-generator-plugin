@@ -10,57 +10,109 @@ class ContentGenerator {
       womenFaces: [],
     }
   }
-
+  
   getRandomMenFaces = (count) => {
     return new Promise((resolve, reject) => {
       if(this.state.menFaces.length === 0) {
         getMenFaces().then((menFaces) => {
           this.state.menFaces = menFaces;
           resolve(getRandom(menFaces, count));
-        })
+        });
       }
       else {
-        resolve(getRandom(this.state.menFaces, count));
+        resolve(getRandom(this.state.menFaces, count % 99));
       }
     });
   }
 
+  getRandomWomenFaces = (count) => {
+    return new Promise((resolve, reject) => {
+      if(this.state.womenFaces.length === 0) {
+        getWomenFaces().then((womenFaces) => {
+          this.state.womenFaces = womenFaces;
+          resolve(getRandom(womenFaces, count));
+        });
+      }
+      else {
+        resolve(getRandom(this.state.womenFaces, count % 99));
+      }
+    });
+  }
+  
   fillMenFaces = () => {
     const selectedNodes = Object.keys(App._state.mirror.sceneGraphSelection);
-
+    
     if (selectedNodes.length === 0) {
       toast('You must select at least one layer.');
       return;
     }
-
+    
     this.getRandomMenFaces(selectedNodes.length).then(faces => {
-      console.log("resolved", faces);
-      selectedNodes.map((node, index) => {
-        setTimeout(()=> {
-          App.sendMessage('clearSelection');
-          App.sendMessage('addToSelection', { nodeIds: [node] });
-          const fillPaints = App._state.mirror.selectionProperties.fillPaints;
-          this.addFillToSelectedLayer(fillPaints, faces[index % 99]);
-          }, 1000 + (index * 250));
-      })
+      this.addFillToSelectedLayer(selectedNodes, faces);
+    });
+  }
+
+  fillWomenFaces = () => {
+    const selectedNodes = Object.keys(App._state.mirror.sceneGraphSelection);
+    
+    if (selectedNodes.length === 0) {
+      toast('You must select at least one layer.');
+      return;
+    }
+    
+    this.getRandomWomenFaces(selectedNodes.length).then(faces => {
+      this.addFillToSelectedLayer(selectedNodes, faces);
     });
   }
   
-  addFillToSelectedLayer = (currentFill, newFill) => {  
-    App.updateSelectionProperties({
-      fillPaints: [...currentFill, newFill]
+  addFillToSelectedLayer = (selectedNodes, fills) => {
+    selectedNodes.map((node, index) => {
+      App.sendMessage('clearSelection');
+      App.sendMessage('addToSelection', { nodeIds: [node] });
+
+      const currentFill = App._state.mirror.selectionProperties.fillPaints;
+      const cappedIndex = index % (fills.length);
+      const newFill = fills[cappedIndex];
+
+      App.updateSelectionProperties({
+        fillPaints: [...currentFill, newFill]
+      })
+      App.sendMessage('clearSelection');
     })
-    App.sendMessage('clearSelection');
   }
 }
 
 const contentGeneratorPlugin = new ContentGenerator();
 
 const options = [
-  contentGeneratorPlugin.name,
-  contentGeneratorPlugin.fillMenFaces.bind(contentGeneratorPlugin)
+  "Fill Faces",
+  () => {},
+  null,
+  [
+    {
+      itemLabel: "Men",
+      triggerFunction: contentGeneratorPlugin.fillMenFaces.bind(contentGeneratorPlugin),
+    },
+    {
+      itemLabel: "Women",
+      triggerFunction: contentGeneratorPlugin.fillWomenFaces.bind(contentGeneratorPlugin),
+    },
+  ],
 ];
 
-window.figmaPlugin.createPluginsMenuItem(...options);
-window.figmaPlugin.createContextMenuItem.Canvas(...options);
-window.figmaPlugin.createContextMenuItem.ObjectsPanel(...options);
+const menuItems = [
+  {
+    title: "Generate: Men Faces",
+    trigger: contentGeneratorPlugin.fillMenFaces.bind(contentGeneratorPlugin),
+  },
+  {
+    title: "Generate: Women Faces",
+    trigger: contentGeneratorPlugin.fillWomenFaces.bind(contentGeneratorPlugin),
+  },
+];
+
+menuItems.map(item => {
+  window.figmaPlugin.createPluginsMenuItem(item.title, item.trigger);
+  window.figmaPlugin.createContextMenuItem.Selection(item.title, item.trigger);
+  window.figmaPlugin.createContextMenuItem.ObjectsPanel(item.title, item.trigger);
+});
