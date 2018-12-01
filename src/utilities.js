@@ -11,3 +11,12 @@ export const getRandom = (arr, n) => {
   }
   return result;
 }
+
+export const toast = (message) => {
+  App._store.dispatch({
+    type: "VISUAL_BELL_ENQUEUE",
+    payload: {
+        message: message || ""
+      }
+  });
+}
