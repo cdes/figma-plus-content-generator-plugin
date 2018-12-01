@@ -148,13 +148,13 @@ Object.defineProperty(exports, "__esModule", {
 exports.getPersonsFemale = exports.getPersonsMale = exports.getPersons = exports.getWomenFaces = exports.getMenFaces = void 0;
 
 var getMenFaces = function getMenFaces() {
-  return loadXHR("https://cdes.github.io/cdes/figma-content-generator-plugin/dist/men-faces.json");
+  return loadXHR("https://cdes.github.io/figma-content-generator-plugin/dist/men-faces.json");
 };
 
 exports.getMenFaces = getMenFaces;
 
 var getWomenFaces = function getWomenFaces() {
-  return loadXHR("https://cdes.github.io/cdes/figma-content-generator-plugin/dist/women-faces.json");
+  return loadXHR("https://cdes.github.io/figma-content-generator-plugin/dist/women-faces.json");
 };
 
 exports.getWomenFaces = getWomenFaces;
