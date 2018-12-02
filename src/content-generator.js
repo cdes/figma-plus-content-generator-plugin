@@ -89,14 +89,19 @@ const options = [
   'Fill Faces',
   () => {},
   null,
+  null,
   [
     {
       itemLabel: 'Men',
       triggerFunction: contentGeneratorPlugin.fillMenFaces.bind(contentGeneratorPlugin),
+      condition: null,
+      shortcut: null,
     },
     {
       itemLabel: 'Women',
       triggerFunction: contentGeneratorPlugin.fillWomenFaces.bind(contentGeneratorPlugin),
+      condition: null,
+      shortcut: null,
     },
   ],
 ];
