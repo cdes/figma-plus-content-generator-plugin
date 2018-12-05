@@ -1,5 +1,5 @@
 import { getRandom, toast, until, toggleLoading, createLoading } from './utilities';
-import { getMenFaces, getWomenFaces } from './api';
+import { getMenFaces, getWomenFaces, getPersons } from './api';
 
 class ContentGenerator {
   constructor() {
@@ -8,9 +8,24 @@ class ContentGenerator {
     this.state = {
       menFaces: [],
       womenFaces: [],
+      data: [],
     };
 
     this.loading = createLoading();
+  }
+
+  getRandomData = (count) => {
+    return new Promise((resolve) => {
+      if(this.state.data.length === 0) {
+        getPersons(count).then((data) => {
+          this.state.data = data;
+          resolve(data);
+        });
+      }
+      else {
+        resolve(this.state.menFaces);
+      }
+    });
   }
 
   getRandomMenFaces = (count) => {
@@ -88,31 +103,87 @@ class ContentGenerator {
       window.App.sendMessage('clearSelection');
     }
   }
+
+  fillData = (type) => {
+    const selectedNodes = Object.keys(window.App._state.mirror.sceneGraphSelection);
+
+    if (selectedNodes.length === 0) {
+      toast('You must select at least one layer.');
+      return;
+    }
+
+    this.getRandomData(selectedNodes.length).then(async items => {
+      toggleLoading(true);
+      await this.setLayerText(selectedNodes, items);
+      toggleLoading(false);
+    });
+  }
 }
 
 const contentGeneratorPlugin = new ContentGenerator();
 
-const options = [
-  'Fill Faces',
-  () => {},
-  null,
-  null,
-  [
-    {
-      itemLabel: 'Men',
-      triggerFunction: contentGeneratorPlugin.fillMenFaces.bind(contentGeneratorPlugin),
-      condition: null,
-      shortcut: null,
-    },
-    {
-      itemLabel: 'Women',
-      triggerFunction: contentGeneratorPlugin.fillWomenFaces.bind(contentGeneratorPlugin),
-      condition: null,
-      shortcut: null,
-    },
+const menuItems = [
+  ['Fill Faces',
+    () => {},
+    null,
+    null,
+    [
+      {
+        itemLabel: 'Men',
+        triggerFunction: contentGeneratorPlugin.fillMenFaces.bind(contentGeneratorPlugin),
+        condition: null,
+        shortcut: null,
+      },
+      {
+        itemLabel: 'Women',
+        triggerFunction: contentGeneratorPlugin.fillWomenFaces.bind(contentGeneratorPlugin),
+        condition: null,
+        shortcut: null,
+      },
+    ],
+  ],
+  ['Fill Data',
+    () => {},
+    null,
+    null,
+    [
+      {
+        itemLabel: 'Names',
+        triggerFunction: contentGeneratorPlugin.fillNames.bind(contentGeneratorPlugin),
+        condition: null,
+        shortcut: null,
+      },
+      {
+        itemLabel: 'Emails',
+        triggerFunction: contentGeneratorPlugin.fillEmails.bind(contentGeneratorPlugin),
+        condition: null,
+        shortcut: null,
+      },
+      {
+        itemLabel: 'Address',
+        triggerFunction: contentGeneratorPlugin.fillLocation.bind(contentGeneratorPlugin),
+        condition: null,
+        shortcut: null,
+      },
+      {
+        itemLabel: 'Username',
+        triggerFunction: contentGeneratorPlugin.fillUsername.bind(contentGeneratorPlugin),
+        condition: null,
+        shortcut: null,
+      },
+      {
+        itemLabel: 'Coordinates',
+        triggerFunction: contentGeneratorPlugin.fillCoordinates.bind(contentGeneratorPlugin),
+        condition: null,
+        shortcut: null,
+      },
+    ],
   ],
 ];
 
-window.figmaPlugin.createPluginsMenuItem(...options);
-window.figmaPlugin.createContextMenuItem.Selection(...options);
-window.figmaPlugin.createContextMenuItem.ObjectsPanel(...options);
+menuItems.map(item => {
+  window.figmaPlugin.createPluginsMenuItem(...item);
+  window.figmaPlugin.createContextMenuItem.Selection(...item);
+  window.figmaPlugin.createContextMenuItem.ObjectsPanel(...item);
+});
+
