@@ -1,4 +1,4 @@
-import { getRandom, toast, until } from './utilities';
+import { getRandom, toast, until, toggleLoading, createLoading } from './utilities';
 import { getMenFaces, getWomenFaces } from './api';
 
 class ContentGenerator {
@@ -9,6 +9,8 @@ class ContentGenerator {
       menFaces: [],
       womenFaces: [],
     };
+
+    this.loading = createLoading();
   }
 
   getRandomMenFaces = (count) => {
@@ -47,8 +49,10 @@ class ContentGenerator {
       return;
     }
 
-    this.getRandomMenFaces(selectedNodes.length).then(faces => {
-      this.addFillToSelectedLayers(selectedNodes, faces);
+    this.getRandomMenFaces(selectedNodes.length).then(async faces => {
+      toggleLoading(true);
+      await this.addFillToSelectedLayers(selectedNodes, faces);
+      toggleLoading(false);
     });
   }
 
@@ -60,12 +64,15 @@ class ContentGenerator {
       return;
     }
 
-    this.getRandomWomenFaces(selectedNodes.length).then(faces => {
-      this.addFillToSelectedLayers(selectedNodes, faces);
+    this.getRandomWomenFaces(selectedNodes.length).then(async faces => {
+      toggleLoading(true);
+      await this.addFillToSelectedLayers(selectedNodes, faces);
+      toggleLoading(false);
     });
   }
 
   addFillToSelectedLayers = async (selectedNodes, fills) => {
+
     for (const [index, node] of selectedNodes.entries()) {
       window.App.sendMessage('clearSelection');
       await until(() => !window.App._state.mirror.selectionProperties.fillPaints);
