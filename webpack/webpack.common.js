@@ -12,6 +12,13 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(['dist'], { root: Path.resolve(__dirname, '..') }),
+    new CopyWebpackPlugin([
+      {
+        from: 'src/*.json',
+        to: 'data/',
+        flatten: true,
+      }
+    ]),
   ],
   resolve: {
     alias: {
@@ -30,5 +37,5 @@ module.exports = {
         }
       },
     ]
-  }
+  },
 };
