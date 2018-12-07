@@ -1,5 +1,6 @@
-import { getRandom, toast, until, toggleLoading, createLoading } from './utilities';
+import { getRandom, until, toggleLoading, createLoading } from './utilities';
 import { getMenFaces, getWomenFaces, getPersons } from './api';
+import { textTransform } from 'text-transform';
 
 class ContentGenerator {
   constructor() {
@@ -12,25 +13,27 @@ class ContentGenerator {
     };
 
     this.loading = createLoading();
+
+    this.toast = window.figmaPlugin.toast;
   }
 
   getRandomData = (count) => {
     return new Promise((resolve) => {
-      if(this.state.data.length === 0) {
+      if(this.state.data.length < count) {
         getPersons(count).then((data) => {
-          this.state.data = data;
-          resolve(data);
+          this.state.data = data.results;
+          resolve(data.results);
         });
       }
       else {
-        resolve(this.state.menFaces);
+        resolve(this.state.data);
       }
     });
   }
 
   getRandomMenFaces = (count) => {
     return new Promise((resolve) => {
-      if(this.state.menFaces.length === 0) {
+      if(this.state.menFaces.length < count) {
         getMenFaces().then((menFaces) => {
           this.state.menFaces = menFaces;
           resolve(getRandom(menFaces, count));
@@ -44,7 +47,7 @@ class ContentGenerator {
 
   getRandomWomenFaces = (count) => {
     return new Promise((resolve) => {
-      if(this.state.womenFaces.length === 0) {
+      if(this.state.womenFaces.length < count) {
         getWomenFaces().then((womenFaces) => {
           this.state.womenFaces = womenFaces;
           resolve(getRandom(womenFaces, count));
@@ -60,7 +63,7 @@ class ContentGenerator {
     const selectedNodes = Object.keys(window.App._state.mirror.sceneGraphSelection);
 
     if (selectedNodes.length === 0) {
-      toast('You must select at least one layer.');
+      this.toast('You must select at least one layer.');
       return;
     }
 
@@ -75,7 +78,7 @@ class ContentGenerator {
     const selectedNodes = Object.keys(window.App._state.mirror.sceneGraphSelection);
 
     if (selectedNodes.length === 0) {
-      toast('You must select at least one layer.');
+      this.toast('⚠️ You must select at least one layer.');
       return;
     }
 
@@ -83,6 +86,7 @@ class ContentGenerator {
       toggleLoading(true);
       await this.addFillToSelectedLayers(selectedNodes, faces);
       toggleLoading(false);
+      this.toast('✅ Filled');
     });
   }
 
@@ -104,19 +108,76 @@ class ContentGenerator {
     }
   }
 
+  fillNames = () => {
+    this.fillData('Names');
+  }
+
+  fillEmails = () => {
+    this.fillData('Emails');
+  }
+
+  fillCity = () => {
+    this.fillData('City');
+  }
+
+  fillUsername = () => {
+    this.fillData('Username');
+  }
+
+  fillCoordinates = () => {
+    this.fillData('Coordinates');
+  }
+
   fillData = (type) => {
     const selectedNodes = Object.keys(window.App._state.mirror.sceneGraphSelection);
 
     if (selectedNodes.length === 0) {
-      toast('You must select at least one layer.');
+      this.toast('⚠️ You must select at least one layer.');
       return;
     }
 
     this.getRandomData(selectedNodes.length).then(async items => {
       toggleLoading(true);
-      await this.setLayerText(selectedNodes, items);
+
+      let filteredItems;
+
+      switch (type) {
+      case 'Names':
+        filteredItems = items.map(item => textTransform(`${item.name.first} ${item.name.last}`, 'capitalize'));
+        break;
+      case 'Emails':
+        filteredItems = items.map(item => item.email);
+        break;
+      case 'City':
+        filteredItems = items.map(item => (
+          `${textTransform(item.location.city, 'capitalize')}`
+        ));
+        break;
+      case 'Username':
+        filteredItems = items.map(item => item.login.username);
+        break;
+      case 'Coordinates':
+        filteredItems = items.map(item => (`${item.location.coordinates.longitude}, ${item.location.coordinates.latitude} `));
+        break;
+      default:
+        break;
+      }
+
+      await this.setLayersText(selectedNodes, filteredItems);
       toggleLoading(false);
+      this.toast('✅ Filled');
     });
+  }
+
+  setLayersText = async (selectedNodes, filteredItems) => {
+    for (const [index, node] of selectedNodes.entries()) {
+      if (window.figmaPlugin.getNodeType(node) === 'TEXT') {
+        window.App.sendMessage('clearSelection');
+        window.App.sendMessage('addToSelection', { nodeIds: [node] });
+        window.figmaPlugin.replaceText(filteredItems[index]);
+        window.App.sendMessage('clearSelection');
+      }
+    }
   }
 }
 
@@ -159,14 +220,9 @@ const menuItems = [
         condition: null,
         shortcut: null,
       },
+
       {
-        itemLabel: 'Address',
-        triggerFunction: contentGeneratorPlugin.fillLocation.bind(contentGeneratorPlugin),
-        condition: null,
-        shortcut: null,
-      },
-      {
-        itemLabel: 'Username',
+        itemLabel: 'Usernames',
         triggerFunction: contentGeneratorPlugin.fillUsername.bind(contentGeneratorPlugin),
         condition: null,
         shortcut: null,
@@ -174,6 +230,12 @@ const menuItems = [
       {
         itemLabel: 'Coordinates',
         triggerFunction: contentGeneratorPlugin.fillCoordinates.bind(contentGeneratorPlugin),
+        condition: null,
+        shortcut: null,
+      },
+      {
+        itemLabel: 'Cities',
+        triggerFunction: contentGeneratorPlugin.fillCity.bind(contentGeneratorPlugin),
         condition: null,
         shortcut: null,
       },

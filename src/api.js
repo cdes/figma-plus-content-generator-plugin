@@ -7,7 +7,7 @@ export const getWomenFaces = () => {
 };
 
 export const getPersons = (count) => {
-  return loadXHR(`https://randomuser.me/api/?results=${count}`);
+  return loadXHR(`https://randomuser.me/api/?results=${count}&nat=us`);
 };
 
 export const getPersonsMale = (count) => {

@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
-    "json5": "^2.1.0"
+    "json5": "^2.1.0",
+    "text-transform": "^0.1.2"
   }
 }
