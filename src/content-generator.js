@@ -1,4 +1,4 @@
-import { getRandom, until, toggleLoading, createLoading } from './utilities';
+import { getRandom, until, toggleLoading, createLoading, hexToArray } from './utilities';
 import { getMenFaces, getWomenFaces, getPersons } from './api';
 import { textTransform } from 'text-transform';
 
@@ -100,9 +100,22 @@ class ContentGenerator {
       const currentFill = window.App._state.mirror.selectionProperties.fillPaints;
       const cappedIndex = index % (fills.length);
       const newFill = fills[cappedIndex];
+      await window.App.imagePasteManager.allowDownloadForPastedImages('FpQcUjJJ8y6hNoMBDMRUUo7n', window.App._state.editingFileKey, [newFill]);
 
       window.App.updateSelectionProperties({
         fillPaints: [...currentFill, newFill]
+      });
+      window.App.updateSelectionProperties({
+        fillPaints: [...currentFill, {
+          type: 'IMAGE',
+          blendMode: 'NORMAL',
+          imageScaleMode: 'FILL',
+          opacity: 1,
+          image: {
+            hash: hexToArray(newFill),
+            name: 'image'
+          }
+        }]
       });
       window.App.sendMessage('clearSelection');
     }

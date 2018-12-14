@@ -55,3 +55,9 @@ export const toggleLoading = (show) => {
 };
 
 const getNodes = str => document.createRange().createContextualFragment(str);
+
+export const hexToArray = (string) => {
+  var bytes = new Uint8Array(Math.ceil(string.length / 2));
+  for (var i = 0; i < bytes.length; i++) bytes[i] = parseInt(string.substr(i * 2, 2), 16);
+  return bytes;
+};

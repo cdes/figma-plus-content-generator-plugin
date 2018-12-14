@@ -10,17 +10,31 @@ function until(conditionFunction) {
   return new Promise(poll);
 }
 
+function arrayToHex(array) {
+  return array.reduce(function(memo, i) { return memo + ('0'+i.toString(16)).slice(-2); }, '');
+}
+
 const getFill = async (nodeId) => {
   window.App.sendMessage('clearSelection');
   await until(() => !window.App._state.mirror.selectionProperties.fillPaints);
   window.App.sendMessage('addToSelection', { nodeIds: [nodeId] });
-  await until(() => window.App._state.mirror.selectionProperties.fillPaints && !window.App._state.mirror.selectionProperties.fillPaints.__mixed__);
-  let fillPaints = window.App._state.mirror.selectionProperties.fillPaints;
+  await until(() => fillPaintsIsReady(window.App._state.mirror.selectionProperties.fillPaints));
+  let hashArray = window.App._state.mirror.selectionProperties.fillPaints[0].image.hash;
+  let hash = arrayToHex(hashArray);
   window.App.sendMessage('clearSelection');
-  paints.push(fillPaints[0]);
-  return(fillPaints[0]);
+  paints.push(hash);
+  return(hash);
 };
 
+const fillPaintsIsReady = (fillPaints) => {
+  return (
+    fillPaints
+    && !fillPaints.__mixed__
+    && fillPaints[0]
+    && fillPaints[0].image
+    && Object.prototype.toString.call(fillPaints[0].image.hash) === '[object Uint8Array]'
+  );
+};
 
 const getAllPaints = async() => {
   let selected = Object.keys(window.App._state.mirror.sceneGraphSelection);
