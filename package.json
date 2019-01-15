@@ -1,10 +1,10 @@
 {
   "name": "figma-content-generator-plugin",
   "productName": "Content Generator",
-  "version": "0.50.0",
+  "version": "0.50.1",
   "description": "Generate placeholder content, names, photos, articles and more on the fly.",
   "repository": "https://github.com/cdes/figma-content-generator-plugin",
-  "author": "Ahmed Al Haddad <haddad@ah.sa>",
+  "author": "Ahmad Al Haddad <haddad@ah.sa>",
   "license": "MIT",
   "scripts": {
     "build": "webpack --config webpack/webpack.config.prod.js  --colors",
