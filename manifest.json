@@ -8,6 +8,11 @@
 	"instructions": "Select layers, right click and select 'Fill Faces' or 'Fill Data'.",
 	"updates": [
     {
+			"version": "0.50.2",
+			"date": "1/16/2019",
+			"notes": "Bug fixes."
+    },
+    {
 			"version": "0.50.1",
 			"date": "1/15/2019",
 			"notes": "Fix bugs and use updated FigmaApi."
