@@ -15,7 +15,6 @@ class ContentGenerator {
     (this.state = {
       menFaces: [],
       womenFaces: [],
-      data: []
     });
 
     this.loading = createLoading();
@@ -25,14 +24,9 @@ class ContentGenerator {
 
   getRandomData = count => {
     return new Promise(resolve => {
-      if (this.state.data.length < count) {
-        getPersons(count).then(data => {
-          this.state.data = data.results;
-          resolve(data.results);
-        });
-      } else {
-        resolve(this.state.data);
-      }
+      getPersons(count).then(data => {
+        resolve(data.results);
+      });
     });
   };
 
