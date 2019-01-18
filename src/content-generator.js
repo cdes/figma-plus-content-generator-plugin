@@ -208,7 +208,7 @@ class ContentGenerator {
 
   setLayersText = async (selectedNodes, filteredItems) => {
     for (const [index, nodeId] of selectedNodes.entries()) {
-      const node = window.figmaPlugin.getNode(nodeId);
+      const node = window.figmaPlugin.scene.getNodeById(nodeId);
       if (node.type === 'TEXT') {
         node.characters = filteredItems[index];
       }
