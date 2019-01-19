@@ -1,12 +1,17 @@
 {
 	"name": "Content Generator",
 	"id": "figma-content-generator-plugin",
-	"version": "0.50.2",
+	"version": "0.50.3",
 	"author": "Ahmad Al Haddad",
 	"github": "https://github.com/cdes/figma-content-generator-plugin",
   "description": "Figma app plugin for generating placeholder content such as avatars, names, addresses, geo data and more.",
 	"instructions": "Select layers, right click and select 'Fill Faces' or 'Fill Data'.",
 	"updates": [
+    {
+			"version": "0.50.3",
+			"date": "1/19/2019",
+			"notes": "Update for Figma Api changes."
+    },
     {
 			"version": "0.50.2",
 			"date": "1/16/2019",
