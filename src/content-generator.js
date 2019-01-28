@@ -19,7 +19,7 @@ class ContentGenerator {
 
     this.loading = createLoading();
 
-    this.showToast = window.figmaPlugin.showToast;
+    this.showToast = window.figmaPlus.showToast;
   }
 
   getRandomData = count => {
@@ -208,7 +208,7 @@ class ContentGenerator {
 
   setLayersText = async (selectedNodes, filteredItems) => {
     for (const [index, nodeId] of selectedNodes.entries()) {
-      const node = window.figmaPlugin.scene.getNodeById(nodeId);
+      const node = window.figmaPlus.scene.getNodeById(nodeId);
       if (node.type === 'TEXT') {
         node.characters = filteredItems[index];
       }
@@ -295,7 +295,7 @@ const menuItems = [
 ];
 
 menuItems.map(item => {
-  window.figmaPlugin.createPluginsMenuItem(...item);
-  window.figmaPlugin.createContextMenuItem.Selection(...item);
-  window.figmaPlugin.createContextMenuItem.ObjectsPanel(...item);
+  window.figmaPlus.createPluginsMenuItem(...item);
+  window.figmaPlus.createContextMenuItem.Selection(...item);
+  window.figmaPlus.createContextMenuItem.ObjectsPanel(...item);
 });
