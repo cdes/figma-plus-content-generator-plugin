@@ -62,7 +62,7 @@ class ContentGenerator {
     );
 
     if (selectedNodes.length === 0) {
-      this.showToast('You must select at least one layer.');
+      this.showToast('⚠️ You must select at least one layer.');
       return;
     }
 
@@ -297,5 +297,4 @@ const menuItems = [
 menuItems.map(item => {
   window.figmaPlus.createPluginsMenuItem(...item);
   window.figmaPlus.createContextMenuItem.Selection(...item);
-  window.figmaPlus.createContextMenuItem.ObjectsPanel(...item);
 });
