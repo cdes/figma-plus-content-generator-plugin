@@ -1,9 +1,9 @@
 export const getMenFaces = () => {
-  return loadXHR('https://cdes.github.io/figma-content-generator-plugin/dist/data/men-faces.json');
+  return loadXHR('https://cdn.jsdelivr.net/gh/cdes/figma-content-generator-plugin@0.50.5/dist/data/men-faces.json');
 };
 
 export const getWomenFaces = () => {
-  return loadXHR('https://cdes.github.io/figma-content-generator-plugin/dist/data/women-faces.json');
+  return loadXHR('https://cdn.jsdelivr.net/gh/cdes/figma-content-generator-plugin@0.50.5/dist/data/women-faces.json');
 };
 
 export const getPersons = (count) => {
