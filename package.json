@@ -1,7 +1,7 @@
 {
   "name": "figma-content-generator-plugin",
   "productName": "Content Generator",
-  "version": "0.50.5",
+  "version": "0.6.0",
   "description": "Generate placeholder content, names, photos, articles and more on the fly.",
   "repository": "https://github.com/cdes/figma-content-generator-plugin",
   "author": "Ahmad Al Haddad <haddad@ah.sa>",

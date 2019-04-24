@@ -5,7 +5,7 @@ import {
   createLoading,
   hexToArray
 } from './utilities';
-import { getMenFaces, getWomenFaces, getPersons } from './api';
+import { getMenFaces, getWomenFaces, getPersons, getPersonsMale, getPersonsFemale } from './api';
 import { textTransform } from 'text-transform';
 
 class ContentGenerator {
@@ -22,11 +22,23 @@ class ContentGenerator {
     this.showToast = window.figmaPlus.showToast;
   }
 
-  getRandomData = count => {
+  getRandomData = (count, gender) => {
     return new Promise(resolve => {
-      getPersons(count).then(data => {
-        resolve(data.results);
-      });
+      if(gender === 'male') {
+        getPersonsMale(count).then(data => {
+          resolve(data.results);
+        });
+      }
+      else if(gender === 'female') {
+        getPersonsFemale(count).then(data => {
+          resolve(data.results);
+        });
+      }
+      else {
+        getPersons(count).then(data => {
+          resolve(data.results);
+        });
+      }
     });
   };
 
@@ -136,8 +148,12 @@ class ContentGenerator {
     }
   };
 
-  fillNames = () => {
-    this.fillData('Names');
+  fillMenNames = () => {
+    this.fillData('Men Names');
+  };
+
+  fillWomenNames = () => {
+    this.fillData('Women Names');
   };
 
   fillEmails = () => {
@@ -166,13 +182,27 @@ class ContentGenerator {
       return;
     }
 
-    this.getRandomData(selectedNodes.length).then(async items => {
+    let gender;
+
+    if(type === 'Men Names') {
+      gender = 'male';
+    }
+    else if(type === 'Women Names') {
+      gender = 'female';
+    }
+
+    this.getRandomData(selectedNodes.length, gender).then(async items => {
       toggleLoading(true);
 
       let filteredItems;
 
       switch (type) {
-      case 'Names':
+      case 'Men Names':
+        filteredItems = items.map(item =>
+          textTransform(`${item.name.first} ${item.name.last}`, 'capitalize')
+        );
+        break;
+      case 'Women Names':
         filteredItems = items.map(item =>
           textTransform(`${item.name.first} ${item.name.last}`, 'capitalize')
         );
@@ -208,7 +238,7 @@ class ContentGenerator {
 
   setLayersText = async (selectedNodes, filteredItems) => {
     for (const [index, nodeId] of selectedNodes.entries()) {
-      const node = window.figmaPlus.scene.getNodeById(nodeId);
+      const node = window.figmaPlus.getNodeById(nodeId);
       if (node.type === 'TEXT') {
         node.characters = filteredItems[index];
       }
@@ -219,82 +249,73 @@ class ContentGenerator {
 const contentGeneratorPlugin = new ContentGenerator();
 
 const menuItems = [
-  [
-    'Fill Faces',
-    () => {},
-    null,
-    null,
-    [
+  {
+    label: 'Fill Faces',
+    action: () => {},
+    submenu: [
       {
-        itemLabel: 'Men',
-        triggerFunction: contentGeneratorPlugin.fillMenFaces.bind(
+        label: 'Men',
+        action: contentGeneratorPlugin.fillMenFaces.bind(
           contentGeneratorPlugin
         ),
-        condition: null,
-        shortcut: null
       },
       {
-        itemLabel: 'Women',
-        triggerFunction: contentGeneratorPlugin.fillWomenFaces.bind(
+        label: 'Women',
+        action: contentGeneratorPlugin.fillWomenFaces.bind(
           contentGeneratorPlugin
         ),
-        condition: null,
-        shortcut: null
       }
-    ]
-  ],
-  [
-    'Fill Data',
-    () => {},
-    null,
-    null,
-    [
+    ],
+    showInCanvasMenu: true,
+    showInSelectionMenu: true,
+  },
+  {
+    label: 'Fill Data',
+    action: () => {},
+    submenu: [
       {
-        itemLabel: 'Names',
-        triggerFunction: contentGeneratorPlugin.fillNames.bind(
+        label: 'Men Names',
+        action: contentGeneratorPlugin.fillMenNames.bind(
           contentGeneratorPlugin
         ),
-        condition: null,
-        shortcut: null
       },
       {
-        itemLabel: 'Emails',
-        triggerFunction: contentGeneratorPlugin.fillEmails.bind(
+        label: 'Women Names',
+        action: contentGeneratorPlugin.fillWomenNames.bind(
           contentGeneratorPlugin
         ),
-        condition: null,
-        shortcut: null
+      },
+      {
+        label: 'Emails',
+        action: contentGeneratorPlugin.fillEmails.bind(
+          contentGeneratorPlugin
+        ),
       },
 
       {
-        itemLabel: 'Usernames',
-        triggerFunction: contentGeneratorPlugin.fillUsername.bind(
+        label: 'Usernames',
+        action: contentGeneratorPlugin.fillUsername.bind(
           contentGeneratorPlugin
         ),
-        condition: null,
-        shortcut: null
       },
       {
-        itemLabel: 'Coordinates',
-        triggerFunction: contentGeneratorPlugin.fillCoordinates.bind(
+        label: 'Coordinates',
+        action: contentGeneratorPlugin.fillCoordinates.bind(
           contentGeneratorPlugin
         ),
-        condition: null,
-        shortcut: null
       },
       {
-        itemLabel: 'Cities',
-        triggerFunction: contentGeneratorPlugin.fillCity.bind(
+        label: 'Cities',
+        action: contentGeneratorPlugin.fillCity.bind(
           contentGeneratorPlugin
         ),
-        condition: null,
-        shortcut: null
       }
-    ]
-  ]
+    ],
+    showInCanvasMenu: true,
+    showInSelectionMenu: true,
+  }
 ];
 
 menuItems.map(item => {
-  window.figmaPlus.createPluginsMenuItem(...item);
-  window.figmaPlus.createContextMenuItem.Selection(...item);
+  window.figmaPlus.addCommand(item);
 });
