@@ -6,16 +6,16 @@ export const getWomenFaces = () => {
   return loadXHR('https://cdn.jsdelivr.net/gh/cdes/figma-content-generator-plugin@0.50.5/dist/data/women-faces.json');
 };
 
-export const getPersons = (count) => {
-  return loadXHR(`https://randomuser.me/api/?results=${count}&nat=us`);
+export const getPersons = (count, nation) => {
+  return loadXHR(`https://randomuser.me/api/?results=${count}&nat=${nation}`);
 };
 
-export const getPersonsMale = (count) => {
-  return loadXHR(`https://randomuser.me/api/?results=${count}&?gender=male`);
+export const getPersonsMale = (count, nation) => {
+  return loadXHR(`https://randomuser.me/api/?results=${count}&?gender=male&nat=${nation}`);
 };
 
-export const getPersonsFemale = (count) => {
-  return loadXHR(`https://randomuser.me/api/?results=${count}&?gender=female`);
+export const getPersonsFemale = (count, nation) => {
+  return loadXHR(`https://randomuser.me/api/?results=${count}&?gender=female&nat=${nation}`);
 };
 
 function loadXHR(url) {
