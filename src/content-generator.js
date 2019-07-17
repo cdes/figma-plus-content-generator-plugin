@@ -11,6 +11,7 @@ import { textTransform } from 'text-transform';
 class ContentGenerator {
   constructor() {
     this.name = 'Content Generator';
+    this.nation = 'us';
     (this.id = 'contentGenerator'),
     (this.state = {
       menFaces: [],
@@ -25,17 +26,17 @@ class ContentGenerator {
   getRandomData = (count, gender) => {
     return new Promise(resolve => {
       if(gender === 'male') {
-        getPersonsMale(count).then(data => {
+        getPersonsMale(count, this.nation).then(data => {
           resolve(data.results);
         });
       }
       else if(gender === 'female') {
-        getPersonsFemale(count).then(data => {
+        getPersonsFemale(count, this.nation).then(data => {
           resolve(data.results);
         });
       }
       else {
-        getPersons(count).then(data => {
+        getPersons(count, this.nation).then(data => {
           resolve(data.results);
         });
       }
@@ -244,6 +245,14 @@ class ContentGenerator {
       }
     }
   };
+
+  setUSNation = () => {
+    this.nation = 'us';
+  }
+
+  setBRNation = () => {
+    this.nation = 'br';
+  };
 }
 
 const contentGeneratorPlugin = new ContentGenerator();
@@ -310,6 +319,27 @@ const menuItems = [
           contentGeneratorPlugin
         ),
       }
+    ],
+    showInCanvasMenu: true,
+    showInSelectionMenu: true,
+  },
+  {
+    label: 'Change Nation',
+    action: () => {},
+    submenu: [
+      {
+        // default
+        label: 'United States',
+        action: contentGeneratorPlugin.setUSNation.bind(
+          contentGeneratorPlugin
+        ),
+      },
+      {
+        label: 'Brazil',
+        action: contentGeneratorPlugin.setBRNation.bind(
+          contentGeneratorPlugin
+        ),
+      },
     ],
     showInCanvasMenu: true,
     showInSelectionMenu: true,
